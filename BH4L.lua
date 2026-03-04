@@ -1,3 +1,9 @@
+-- Isso impede que o erro fatal do Sense pare o seu script inteiro
+debug.setmetatable(0, {
+    __index = function() return {} end,
+    __newindex = function() return end
+})
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
