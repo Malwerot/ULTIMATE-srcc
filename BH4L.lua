@@ -327,8 +327,8 @@ Themes:CreateDropdown({
 -- [ ABA: SENSE (ESP) ]
 ----------------------------------------------------------------
 local Sense = loadstring(game:HttpGet('https://sirius.menu/sense'))()
-Sense.teamSettings.enemy.enabled = false
-Sense.teamSettings.friendly.enabled = false
+Sense.teamSettings.enemy.enabled = true
+Sense.teamSettings.friendly.enabled = true
 
 local function setBoth(settingName, value)
     if Sense and Sense.teamSettings then
@@ -477,7 +477,6 @@ end
 ----------------------------------------------------------------
 -- [ CARREGAMENTO FINAL E CONEXÕES ]
 ----------------------------------------------------------------
-Sense.Load()
 Rayfield:LoadConfiguration()
 
 local limbs = {}
