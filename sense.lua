@@ -391,10 +391,10 @@ function EspObject:Render()
 
 	local box3dEnabled = enabled and onScreen and options.box3d;
 	for i = 1, #box3d do
-		local face = box3d[i];
+		--local face = box3d[i];
 		for i2 = 1, #face do
 			local line = face[i2];
-			line.Visible = box3dEnabled;
+		--	line.Visible = box3dEnabled;
 			line.Color = parseColor(self, options.box3dColor[1]);
 			line.Transparency = options.box3dColor[2];
 		end
