@@ -1,3 +1,17 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+getgenv().le = getgenv().le or loadstring(game:HttpGet('https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/LimbExtender.lua'))()
+local LimbExtender = getgenv().le
+
+local le = LimbExtender({
+    LISTEN_FOR_INPUT = false,
+    USE_HIGHLIGHT = false,
+})
+
+getgenv().uilibray = getgenv().uilibray or loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Rayfield = getgenv().uilibray
+
 ----------------------------------------------------------------
 -- [ SISTEMA DE PROTEÇÃO E SILENCIADOR ]
 ----------------------------------------------------------------
@@ -23,20 +37,6 @@ oldIndex = debug.setmetatable(0, {
         return -- Ignora tentativas de definir valores (como .Visible = true) em números
     end
 })
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-getgenv().le = getgenv().le or loadstring(game:HttpGet('https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/LimbExtender.lua'))()
-local LimbExtender = getgenv().le
-
-local le = LimbExtender({
-    LISTEN_FOR_INPUT = false,
-    USE_HIGHLIGHT = false,
-})
-
-getgenv().uilibray = getgenv().uilibray or loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local Rayfield = getgenv().uilibray
 
 local Messages = {
     "happy halloween 🎃",
