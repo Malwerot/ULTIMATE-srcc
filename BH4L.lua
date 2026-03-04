@@ -1,11 +1,6 @@
 local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
-----------------------------------------------------------------
--- [ CARREGAMENTO DE BIBLIOTECAS ]
-----------------------------------------------------------------
 getgenv().le = getgenv().le or loadstring(game:HttpGet('https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/LimbExtender.lua'))()
 local LimbExtender = getgenv().le
 
@@ -17,119 +12,18 @@ local le = LimbExtender({
 getgenv().uilibray = getgenv().uilibray or loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Rayfield = getgenv().uilibray
 
-----------------------------------------------------------------
--- [ LÓGICA DO AUTOFARM ]
-----------------------------------------------------------------
-local farmConnection
-local currentIndex = 1
-local farmTimer = 0
-local equipPending = false
-local equipTimer = 0
-local EQUIP_DELAY = 0.3
-
-local farmItems = {
-    {name = "Water", cooldown = 0.5},
-    {name = "Sugar Block Bag", cooldown = 22},
-    {name = "Gelatin", cooldown = 2.8},
-    {name = "Empty Bag", cooldown = 47},
-}
-
-local function countItems(itemName)
-    local count = 0
-    local backpack = LocalPlayer.Backpack
-    local character = LocalPlayer.Character
-    local items = {}
-    if backpack then for _, v in ipairs(backpack:GetChildren()) do table.insert(items, v) end end
-    if character then for _, v in ipairs(character:GetChildren()) do table.insert(items, v) end end
-    
-    for _, item in ipairs(items) do
-        if item:IsA("Tool") and item.Name == itemName then
-            count = count + 1
-        end
-    end
-    return count
-end
-
-local function equipItem(itemName)
-    local character = LocalPlayer.Character
-    if not character then return false end
-    local tool = LocalPlayer.Backpack:FindFirstChild(itemName)
-    if tool then
-        character.Humanoid:EquipTool(tool)
-        return true
-    end
-    return false
-end
-
-local function pressE()
-    pcall(function()
-        local locations = {
-            Workspace.Map.Houses.WH1:FindFirstChild("Interior"),
-            Workspace.Map.Locations.Apartments:FindFirstChild("Home 1"),
-            Workspace.Map.Locations.Apartments:FindFirstChild("Home 2"),
-            Workspace.Map.Locations.Apartments:FindFirstChild("Home 3"),
-            Workspace.Map.Locations.Apartments:FindFirstChild("Home 4")
-        }
-        -- Usando pairs para evitar que pare se encontrar um nil no meio do caminho
-        for _, loc in pairs(locations) do
-            if type(loc) == "userdata" then
-                for _, child in ipairs(loc:GetChildren()) do
-                    if child.Name == "Cooking Pot" then
-                        local att = child:FindFirstChild("Attachment")
-                        local pp = att and att:FindFirstChild("ProximityPrompt")
-                        if pp then fireproximityprompt(pp) end
-                    end
-                end
-            end
-        end
-    end)
-end
-
-local function startAutoFarm()
-    if farmConnection then farmConnection:Disconnect() end
-    farmTimer = 0
-    currentIndex = 1
-    farmConnection = RunService.Heartbeat:Connect(function(dt)
-        farmTimer = farmTimer + dt
-        if equipPending then
-            equipTimer = equipTimer + dt
-            if equipTimer >= EQUIP_DELAY then
-                pressE()
-                equipPending = false
-                equipTimer = 0
-                farmTimer = 0
-            end
-        elseif farmTimer >= farmItems[currentIndex].cooldown then
-            if equipItem(farmItems[currentIndex].name) then
-                equipPending = true
-                equipTimer = 0
-            end
-            currentIndex = currentIndex % #farmItems + 1
-            farmTimer = 0
-        end
-    end)
-end
-
-local function stopAutoFarm()
-    if farmConnection then farmConnection:Disconnect() farmConnection = nil end
-    equipPending = false
-end
-
-----------------------------------------------------------------
--- [ CONFIGURAÇÃO DA JANELA RAYFIELD ]
-----------------------------------------------------------------
 local Messages = {
-    "Don't Blink Or Stare 🩸",
-    "BloodHound On Top 🩸",
-    "Vô do Silver Gosta de Anão ⛔",
-    "DRACKOZADA DO INGUIÇA XOTA 💲",
-    "     /̵͇̿̿/’̿’̿ ̿ ̿̿ ̿̿ ̿̿💥  ",
-    "A",
-    "SILVER BALUDÃO 🥵",
-    "XOSOOOOOOOOO 💋",
-    "M4 ☯︎",
-    "SALUTATIONS TO BWD ⚜︎",
-    "STACKS OF MONEY 💵",
+    "happy halloween 🎃",
+    "skeleton meme from 2021 💀",
+    "spooky ass message 🕸🕷",
+    "THE FLYING DUTCHMAN! ⚓",
+    "👻 BOO! JOB APPLICATION 📄",
+    "trick or treat smell my feet 🦶",
+    "santa claus is lowkey a freak 😰",
+    "spooky scary coolkids 😈",
+    "itsa spooki month 🕺🕺",
+    "kitkat razerblade edition 🍬",
+    "update: fucking nothing 🎃😨",
     "follow axiogenesis on roblox 🦴👁",
 }
 local ChosenMessage = Messages[math.random(1, #Messages)]
@@ -137,10 +31,13 @@ local ChosenMessage = Messages[math.random(1, #Messages)]
 local Window = Rayfield:CreateWindow({
     Name = "AXIOS",
     Icon = 107904589783906,
+
     LoadingTitle = "AXIOS",
     LoadingSubtitle = ChosenMessage,
+
     Theme = "Default",
-    DisableRayfieldPrompts = false,
+    DisableRayfieldPrompts = true,
+
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "LimbExtenderConfigs",
@@ -148,84 +45,11 @@ local Window = Rayfield:CreateWindow({
     },
 })
 
--- Criando as abas
-local AutoTab = Window:CreateTab("AutoFarm", "badge-dollar-sign")
 local Settings = Window:CreateTab("Limbs", "scale-3d")
 local Tab = Window:CreateTab("Sense", "eye")
 local Target = Window:CreateTab("Target", "crosshair")
 local Themes = Window:CreateTab("Themes", "palette")
 
-----------------------------------------------------------------
--- [ ABA: AUTOFARM - ATUALIZADA ]
-----------------------------------------------------------------
-AutoTab:CreateSection("Marshmallow AutoFarm")
-
-AutoTab:CreateToggle({
-    Name = "Iniciar AutoFarm (Cooking Pots)",
-    CurrentValue = false,
-    Flag = "AutoFarmMainToggle",
-    Callback = function(Value)
-        if Value then startAutoFarm() else stopAutoFarm() end
-    end,
-})
-
-AutoTab:CreateButton({
-    Name = "Vender para Lamont Bell (Instant)",
-    Callback = function()
-        pcall(function()
-            local npc = Workspace.Folders.NPCs:FindFirstChild("Lamont Bell")
-            if npc and npc:FindFirstChild("UpperTorso") then
-                local pp = npc.UpperTorso:FindFirstChild("ProximityPrompt")
-                if pp then
-                    pp.HoldDuration = 0
-                    fireproximityprompt(pp)
-                end
-            end
-        end)
-    end,
-})
-
-AutoTab:CreateDivider()
-
--- Label que será atualizada
-local MarshLabel = AutoTab:CreateLabel("🍡 Marshmallows possíveis: 0")
-
--- Variável para controlar o loop do contador
-local countingActive = false
-
-AutoTab:CreateToggle({
-    Name = "Atualizar Contador em Tempo Real",
-    CurrentValue = false,
-    Flag = "RealTimeCounter",
-    Callback = function(Value)
-        countingActive = Value
-        
-        task.spawn(function()
-            while countingActive do
-                -- Pcall evita que o erro pare o script e suje o log
-                pcall(function()
-                    local s = countItems("Sugar Block Bag")
-                    local w = countItems("Water")
-                    local g = countItems("Gelatin")
-                    
-                    -- Proteção básica: se os itens forem nil, o total é 0
-                    local total = math.min(s or 0, w or 0, g or 0)
-                    
-                    -- Verifica se o MarshLabel ainda existe antes de setar
-                    if MarshLabel and MarshLabel.Set then
-                        MarshLabel:Set("🍡 Marshmallows possíveis: " .. tostring(total))
-                    end
-                end)
-                
-                task.wait(2) -- Aumentei para 2 segundos para dar fôlego ao CoreGui
-            end
-        end)
-    end,
-})
-
-----------------------------------------------------------------
--- [ ABA: LIMBS (LimbExtender) ]
-----------------------------------------------------------------
 local function safeCreate(tab, methodName, opts)
     local method = tab[methodName]
     if type(method) == "function" then
@@ -249,8 +73,9 @@ local function createOption(params)
         Color = params.color,
         Increment = params.increment,
         Callback = function(Value)
+            
             if params.multipleOptions == false and type(Value) == "table" then
-                Value = Value[1] or Value
+                Value = Value[1]
             end
             le:Set(params.flag, Value)
         end,
@@ -295,23 +120,17 @@ Settings:CreateKeybind({
     end,
 })
 
-----------------------------------------------------------------
--- [ ABA: TARGET ]
-----------------------------------------------------------------
 local TargetLimb = Target:CreateDropdown({
     Name = "Target Limb",
     Options = {},
-    CurrentOption = { le:Get("TARGET_LIMB") or "Head" },
+    CurrentOption = { le:Get("TARGET_LIMB") },
     MultipleOptions = false,
     Flag = "TARGET_LIMB",
     Callback = function(Options)
-        le:Set("TARGET_LIMB", type(Options) == "table" and Options[1] or Options)
+        le:Set("TARGET_LIMB", Options[1])
     end,
 })
 
-----------------------------------------------------------------
--- [ ABA: THEMES ]
-----------------------------------------------------------------
 Themes:CreateDropdown({
     Name = "Current Theme",
     Options = {"Default", "AmberGlow", "Amethyst", "Bloom", "DarkBlue", "Green", "Light", "Ocean", "Serenity"},
@@ -319,13 +138,10 @@ Themes:CreateDropdown({
     MultipleOptions = false,
     Flag = "CurrentTheme",
     Callback = function(Options)
-        Window:ModifyTheme(type(Options) == "table" and Options[1] or Options)
+        Window.ModifyTheme(Options[1])
     end,
 })
 
-----------------------------------------------------------------
--- [ ABA: SENSE (ESP) ]
-----------------------------------------------------------------
 local Sense = loadstring(game:HttpGet('https://sirius.menu/sense'))()
 Sense.teamSettings.enemy.enabled = true
 Sense.teamSettings.friendly.enabled = true
@@ -343,7 +159,9 @@ local function createControl(def)
     local function applyPropsToTeams(value)
         if not def.props then return end
         local function wrapColor(c)
-            if def.alpha ~= nil then return {c, def.alpha} end
+            if def.alpha ~= nil then
+                return {c, def.alpha}
+            end
             return c
         end
 
@@ -362,7 +180,9 @@ local function createControl(def)
     end
 
     local function controlCallback(v)
-        if def.setting then setBoth(def.setting, v) end
+        if def.setting then
+            setBoth(def.setting, v)
+        end
         applyPropsToTeams(v)
         if def.onChange then def.onChange(v) end
     end
@@ -378,26 +198,9 @@ local function createControl(def)
     elseif def.type == "color" then
         return Tab:CreateColorPicker({ Name = def.name, Color = def.color or Color3.fromRGB(255,255,255), Flag = def.flag or "", Callback = controlCallback })
     elseif def.type == "dropdown" then
-        return Tab:CreateDropdown({ 
-            Name = def.name, 
-            Options = def.options or {}, 
-            CurrentOption = {def.current}, 
-            Flag = def.flag or "", 
-            Callback = function(v)
-                local val = type(v) == "table" and v[1] or v
-                controlCallback(val)
-            end 
-        })
+        return Tab:CreateDropdown({ Name = def.name, Options = def.options or {}, CurrentOption = def.current, Flag = def.flag or "", Callback = controlCallback })
     elseif def.type == "slider" then
-        return Tab:CreateSlider({ 
-            Name = def.name, 
-            Range = def.range or {0,100}, 
-            CurrentValue = def.default or (def.range and def.range[1]) or 0, 
-            Increment = def.increment or 1, 
-            Suffix = def.suffix or "", 
-            Flag = def.flag or "", 
-            Callback = controlCallback 
-        })
+        return Tab:CreateSlider({ Name = def.name, Range = def.range or {0,100}, CurrentValue = (def.default ~= nil and def.default) or ((def.range and def.range[1]) or 0), Increment = def.increment or 1, Suffix = def.suffix or "", Flag = def.flag or "", Callback = controlCallback })
     end
 end
 
@@ -441,7 +244,7 @@ local ui = {
     { type = "section", name = "Tracer" },
     toggle("Enabled", "Tracers", "tracer", false),
     toggle("Outline", "TracersOutlined", "tracerOutline", true),
-    { type = "dropdown", name = "Origin", flag = "TracerOrigin", options = {"Bottom","Top","Mouse"}, current = "Bottom", onChange = function(v) setBoth("tracerOrigin", type(v) == "table" and v[1] or v) end },
+    { type = "dropdown", name = "Origin", flag = "TracerOrigin", options = {"Bottom","Top","Mouse"}, current = "Bottom", onChange = function(v) setBoth("tracerOrigin", v) end },
 
     { type = "section", name = "Tag" },
     toggle("Name", "Names", "name", false),
@@ -449,7 +252,7 @@ local ui = {
     toggle("Distance", "Distances", "distance", false),
     toggle("Distance Outlined", "DistancesOutlined", "distanceOutline", true),
     toggle("Health", "Health", "healthText", false),
-    toggle("Health Outlined", "HealthsOutlined", "healthTextOutline", true), -- Nome corrigido aqui
+    toggle("Health Outlined", "HealthsOutlined", "healthOutline", true),
 
     { type = "section", name = "Chams" },
     toggle("Enabled", "Chams", "chams", false),
@@ -474,9 +277,7 @@ for _, entry in ipairs(ui) do
     createControl(entry)
 end
 
-----------------------------------------------------------------
--- [ CARREGAMENTO FINAL E CONEXÕES ]
-----------------------------------------------------------------
+Sense.Load()
 Rayfield:LoadConfiguration()
 
 local limbs = {}
@@ -507,10 +308,3 @@ LocalPlayer.CharacterAdded:Connect(characterAdded)
 if LocalPlayer.Character then
     characterAdded(LocalPlayer.Character)
 end
-
-Rayfield:Notify({
-    Title = "Script Carregado!",
-    Content = "AutoFarm e ESP prontos.",
-    Duration = 4,
-    Image = 4483345998,
-})
