@@ -1,7 +1,27 @@
--- Isso impede que o erro fatal do Sense pare o seu script inteiro
-debug.setmetatable(0, {
-    __index = function() return {} end,
-    __newindex = function() return end
+----------------------------------------------------------------
+-- [ SISTEMA DE PROTEÇÃO E SILENCIADOR ]
+----------------------------------------------------------------
+
+-- 1. Silenciador de Warnings (Para o erro "Instance handler already exists")
+local oldWarn = warn
+warn = function(...)
+    local msg = tostring(...)
+    if msg:find("Instance handler") or msg:find("already exists") then
+        return -- Bloqueia o spam amarelo
+    end
+    oldWarn(...)
+end
+
+-- 2. Parador de Erros de Index (Para o erro "attempt to index number with 'Visible'")
+-- Isso impede que o script morra se o Sense tentar acessar propriedades em valores errados
+local oldIndex
+oldIndex = debug.setmetatable(0, {
+    __index = function(self, key)
+        return function() end -- Retorna uma função vazia para evitar erros de chamada
+    end,
+    __newindex = function(self, key, value)
+        return -- Ignora tentativas de definir valores (como .Visible = true) em números
+    end
 })
 
 local Players = game:GetService("Players")
