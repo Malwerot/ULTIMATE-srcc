@@ -36,7 +36,7 @@ local Window = Rayfield:CreateWindow({
     LoadingSubtitle = ChosenMessage,
 
     Theme = "Default",
-    DisableRayfieldPrompts = false,
+    DisableRayfieldPrompts = true,
 
     ConfigurationSaving = {
         Enabled = true,
@@ -142,43 +142,16 @@ Themes:CreateDropdown({
     end,
 })
 
-----------------------------------------------------------------
--- [ ABA: SENSE (ESP) - CARREGAMENTO MANUAL SEGURO ]
-----------------------------------------------------------------
-local Sense = loadstring(game:HttpGet('https://raw.githubusercontent.com/Malwerot/BH4L-ULTIMATE/refs/heads/main/sense.lua'))()
-
--- 1. NÃO VAMOS USAR O SENSE.LOAD() ORIGINAL.
--- Vamos criar nossa própria função de carregar que ignora os erros.
-
-local function SafeLoad()
-    -- Desativa o Box 3D e Outlines que são a causa real do spam de logs
-    Sense.teamSettings.enemy.box3d = false
-    Sense.teamSettings.friendly.box3d = false
-    Sense.teamSettings.enemy.boxOutline = false
-    Sense.teamSettings.friendly.boxOutline = false
-    
-    -- Tenta iniciar o ESP de cada jogador individualmente com proteção
-    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-        if player ~= game:GetService("Players").LocalPlayer then
-            pcall(function()
-                -- Adiciona o jogador ao cache do Sense manualmente
-                -- Se der erro aqui, o pcall abafa e não gera log
-                Sense.AddInstance(player, {enabled = true})
-            end)
-        end
-    end
-    
-    -- Conecta novos jogadores de forma segura
-    game:GetService("Players").PlayerAdded:Connect(function(player)
-        pcall(function()
-            Sense.AddInstance(player, {enabled = true})
-        end)
-    end)
-end
-
--- 2. Configurações básicas
+local Sense = loadstring(game:HttpGet('https://sirius.menu/sense'))()
 Sense.teamSettings.enemy.enabled = true
 Sense.teamSettings.friendly.enabled = true
+
+local function setBoth(settingName, value)
+    if Sense and Sense.teamSettings then
+        Sense.teamSettings.enemy[settingName] = value
+        Sense.teamSettings.friendly[settingName] = value
+    end
+end
 
 local function createControl(def)
     if not def or not def.type then return end
@@ -304,18 +277,18 @@ for _, entry in ipairs(ui) do
     createControl(entry)
 end
 
-pcall(SafeLoad)
+Sense.Load()
 Rayfield:LoadConfiguration()
 
-local limbs = {}
-local function addLimbIfNew(name)
-    if not name then return end
-    if not table.find(limbs, name) then
-        table.insert(limbs, name)
-        table.sort(limbs)
-        TargetLimb:Refresh(limbs)
-    end
-end
+--local limbs = {}
+--local function addLimbIfNew(name)
+--    if not name then return end
+--    if not table.find(limbs, name) then
+ --       table.insert(limbs, name)
+ --      table.sort(limbs)
+ --       TargetLimb:Refresh(limbs)
+--    end
+--end
 
 local function characterAdded(Character)
     if not Character then return end
