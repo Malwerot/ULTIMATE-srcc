@@ -138,7 +138,6 @@ local Window = Rayfield:CreateWindow({
 -- Themes tab (mantido pois é utilitário da UI)
 local AutoTab = Window:CreateTab("AutoFarm", "dollar-sign")
 local Themes = Window:CreateTab("Themes", "palette")
-local CardFarm = Windows:CreateTab("Card", "credit-card")
 
 ----------------------------------------------------------------
 -- [ ABA: AUTOFARM - ATUALIZADA ]
