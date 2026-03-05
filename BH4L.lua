@@ -142,7 +142,7 @@ Themes:CreateDropdown({
     end,
 })
 
-local Sense = loadstring(game:HttpGet('https://sirius.menu/sense'))()
+--local Sense = loadstring(game:HttpGet('https://sirius.menu/sense'))()
 Sense.teamSettings.enemy.enabled = true
 Sense.teamSettings.friendly.enabled = true
 
@@ -280,15 +280,15 @@ end
 Sense.Load()
 Rayfield:LoadConfiguration()
 
---local limbs = {}
---local function addLimbIfNew(name)
---    if not name then return end
---    if not table.find(limbs, name) then
- --       table.insert(limbs, name)
- --      table.sort(limbs)
- --       TargetLimb:Refresh(limbs)
---    end
---end
+local limbs = {}
+local function addLimbIfNew(name)
+    if not name then return end
+    if not table.find(limbs, name) then
+       table.insert(limbs, name)
+       table.sort(limbs)
+        TargetLimb:Refresh(limbs)
+    end
+end
 
 local function characterAdded(Character)
     if not Character then return end
