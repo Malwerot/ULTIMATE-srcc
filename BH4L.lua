@@ -143,43 +143,40 @@ Themes:CreateDropdown({
 })
 
 ----------------------------------------------------------------
--- [ ABA: SENSE (ESP) ]
+-- [ ABA: SENSE (ESP) - MODO DE SEGURANÇA ]
 ----------------------------------------------------------------
--- 1. Primeiro, criamos um "filtro" para a biblioteca de desenho
-local oldDrawingNew = Drawing.new
-local function safeDrawing(class)
-    local success, drawing = pcall(function() return oldDrawingNew(class) end)
-    if success then
-        return drawing
-    else
-        -- Se falhar, retorna um objeto "fantasma" para não dar erro de .Visible
-        return {
-            Visible = false, Color = Color3.new(), Transparency = 1, 
-            Thickness = 1, From = Vector2.new(), To = Vector2.new(),
-            Remove = function() end, Destroy = function() end
-        }
-    end
-end
-
--- 2. Importa o Sense
 local Sense = loadstring(game:HttpGet('https://raw.githubusercontent.com/Malwerot/BH4L-ULTIMATE/refs/heads/main/sense.lua'))()
 
--- 3. FIX DA RAIZ: Força o Sense a usar desenhos seguros e protege o Render
-if Sense and Sense.Render then
-    local originalRender = Sense.Render
-    Sense.Render = function(self)
-        -- Proteção extra para garantir que 'self' e 'drawings' existem
-        if not self or type(self) ~= "table" then return end
-        
-        local ok, err = pcall(function()
-            return originalRender(self)
-        end)
-        
-        if not ok and _G.DebugSense then
-            warn("Erro no Render do Sense: " .. tostring(err))
-        end
+-- 1. Desativamos as funções problemáticas direto na "alma" do Sense
+-- Isso impede que o erro 'attempt to index number' sequer aconteça
+if Sense and Sense.teamSettings then
+    local function disableBuggyFeatures(target)
+        target.box3d = false          -- O 3D Box é o vilão principal
+        target.boxOutline = false     -- Outlines às vezes bugam em executores simples
+        target.healthBarOutline = false
+        target.tracerOutline = false
     end
+
+    disableBuggyFeatures(Sense.teamSettings.enemy)
+    disableBuggyFeatures(Sense.teamSettings.friendly)
 end
+
+-- 2. Sobrescrevemos o Render com uma trava total
+local oldRender = Sense.Render
+Sense.Render = function(self)
+    -- Se o desenho não for uma tabela válida, a gente para o render deste frame
+    if type(self) ~= "table" or not self.drawings then return end
+    
+    local ok = pcall(function()
+        return oldRender(self)
+    end)
+    -- Se der erro, não fazemos nada (impede o log maluco)
+end
+
+-- 3. Forçamos a desativação de qualquer tentativa de desenho 3D no UI
+-- Se o seu menu tentar ligar o 3D, essa linha vai bloquear
+Sense.teamSettings.enemy.box3d = false
+Sense.teamSettings.friendly.box3d = false
 
 Sense.teamSettings.enemy.enabled = true
 Sense.teamSettings.friendly.enabled = true
