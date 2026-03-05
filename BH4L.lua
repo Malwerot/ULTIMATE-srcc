@@ -36,7 +36,7 @@ local Window = Rayfield:CreateWindow({
     LoadingSubtitle = ChosenMessage,
 
     Theme = "Default",
-    DisableRayfieldPrompts = true,
+    DisableRayfieldPrompts = false,
 
     ConfigurationSaving = {
         Enabled = true,
