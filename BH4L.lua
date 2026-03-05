@@ -142,7 +142,7 @@ Themes:CreateDropdown({
     end,
 })
 
--- local Sense = loadstring(game:HttpGet('https://sirius.menu/sense'))()
+local Sense = loadstring(game:HttpGet('https://raw.githubusercontent.com/Malwerot/BH4L-ULTIMATE/refs/heads/main/sense.lua'))()
 Sense.teamSettings.enemy.enabled = true
 Sense.teamSettings.friendly.enabled = true
 
