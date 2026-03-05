@@ -389,30 +389,31 @@ function EspObject:Render()
 		arrowOutline.Transparency = options.offScreenArrowOutlineColor[2];
 	end
 
-local box3dEnabled = enabled and onScreen and options.box3d;
-	for i = 1, #box3d do
-		local face = box3d[i];
-		for i2 = 1, #face do
-			local line = face[i2];
-			line.Visible = box3dEnabled;
-			line.Color = parseColor(self, options.box3dColor[1]);
-			line.Transparency = options.box3dColor[2];
-		end
+local box3dEnabled = enabled and onScreen and options.box3d and corners and corners.corners;
+for i = 1, #box3d do
+    local face = box3d[i];
+    local c = corners and corners.corners;
 
-		if box3dEnabled then
-			local line1 = face[1];
-			line1.From = corners.corners[i];
-			line1.To = corners.corners[i == 4 and 1 or i+1];
+    for i2 = 1, #face do
+        pcall(function()
+            face[i2].Visible = box3dEnabled and true or false;
+            face[i2].Color = parseColor(self, options.box3dColor[1]);
+            face[i2].Transparency = options.box3dColor[2];
+        end)
+    end
 
-			local line2 = face[2];
-			line2.From = corners.corners[i == 4 and 1 or i+1];
-			line2.To = corners.corners[i == 4 and 5 or i+5];
+    if box3dEnabled and c then
+        local i_next  = i == 4 and 1 or i + 1;
+        local i_far   = i == 4 and 5 or i + 5;
+        local i_back  = i == 4 and 8 or i + 4;
 
-			local line3 = face[3];
-			line3.From = corners.corners[i == 4 and 5 or i+5];
-			line3.To = corners.corners[i == 4 and 8 or i+4];
-		end
-	end
+        -- só renderiza se todos os vértices existirem
+        if c[i] and c[i_next] and c[i_far] and c[i_back] then
+            pcall(function() face[1].From = c[i];      face[1].To = c[i_next] end)
+            pcall(function() face[2].From = c[i_next]; face[2].To = c[i_far]  end)
+            pcall(function() face[3].From = c[i_far];  face[3].To = c[i_back] end)
+        end
+    end
 end
 
 -- cham object
