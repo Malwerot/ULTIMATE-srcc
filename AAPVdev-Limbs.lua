@@ -277,6 +277,6 @@ function LimbExtender:Set(key, value)
 end
 
 -- Execução do script
-function LimbExtender:Get(key) return self._settings[key] end
+-- function LimbExtender:Get(key) return self._settings[key] end
 
-return setmetatable({}, { __call = function(_, userSettings) return LimbExtender.new(userSettings) end, __index = LimbExtender, })
+-- return setmetatable({}, { __call = function(_, userSettings) return LimbExtender.new(userSettings) end, __index = LimbExtender, })
