@@ -4,6 +4,103 @@ local LocalPlayer = Players.LocalPlayer
 getgenv().uilibray = getgenv().uilibray or loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Rayfield = getgenv().uilibray
 
+----------------------------------------------------------------
+-- [ LÓGICA DO AUTOFARM ]
+----------------------------------------------------------------
+local farmConnection
+local currentIndex = 1
+local farmTimer = 0
+local equipPending = false
+local equipTimer = 0
+local EQUIP_DELAY = 0.3
+
+local farmItems = {
+    {name = "Water", cooldown = 0.5},
+    {name = "Sugar Block Bag", cooldown = 22},
+    {name = "Gelatin", cooldown = 2.8},
+    {name = "Empty Bag", cooldown = 47},
+}
+
+local function countItems(itemName)
+    local count = 0
+    local backpack = LocalPlayer.Backpack
+    local character = LocalPlayer.Character
+    local items = {}
+    if backpack then for _, v in ipairs(backpack:GetChildren()) do table.insert(items, v) end end
+    if character then for _, v in ipairs(character:GetChildren()) do table.insert(items, v) end end
+    
+    for _, item in ipairs(items) do
+        if item:IsA("Tool") and item.Name == itemName then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+local function equipItem(itemName)
+    local character = LocalPlayer.Character
+    if not character then return false end
+    local tool = LocalPlayer.Backpack:FindFirstChild(itemName)
+    if tool then
+        character.Humanoid:EquipTool(tool)
+        return true
+    end
+    return false
+end
+
+local function pressE()
+    pcall(function()
+        local locations = {
+            Workspace.Map.Houses.WH1:FindFirstChild("Interior"),
+            Workspace.Map.Locations.Apartments:FindFirstChild("Home 1"),
+            Workspace.Map.Locations.Apartments:FindFirstChild("Home 2"),
+            Workspace.Map.Locations.Apartments:FindFirstChild("Home 3"),
+            Workspace.Map.Locations.Apartments:FindFirstChild("Home 4")
+        }
+        for _, loc in ipairs(locations) do
+            if loc then
+                for _, child in ipairs(loc:GetChildren()) do
+                    if child.Name == "Cooking Pot" then
+                        local att = child:FindFirstChild("Attachment")
+                        local pp = att and att:FindFirstChild("ProximityPrompt")
+                        if pp then fireproximityprompt(pp) end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+local function startAutoFarm()
+    if farmConnection then farmConnection:Disconnect() end
+    farmTimer = 0
+    currentIndex = 1
+    farmConnection = RunService.Heartbeat:Connect(function(dt)
+        farmTimer = farmTimer + dt
+        if equipPending then
+            equipTimer = equipTimer + dt
+            if equipTimer >= EQUIP_DELAY then
+                pressE()
+                equipPending = false
+                equipTimer = 0
+                farmTimer = 0
+            end
+        elseif farmTimer >= farmItems[currentIndex].cooldown then
+            if equipItem(farmItems[currentIndex].name) then
+                equipPending = true
+                equipTimer = 0
+            end
+            currentIndex = currentIndex % #farmItems + 1
+            farmTimer = 0
+        end
+    end)
+end
+
+local function stopAutoFarm()
+    if farmConnection then farmConnection:Disconnect() farmConnection = nil end
+    equipPending = false
+end
+
 local Messages = {
     "happy halloween 🎃",
     "skeleton meme from 2021 💀",
@@ -38,7 +135,69 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- Themes tab (mantido pois é utilitário da UI)
+local AutoTab = Window:CreateTab("AutoFarm", "dollar-sign")
 local Themes = Window:CreateTab("Themes", "palette")
+
+----------------------------------------------------------------
+-- [ ABA: AUTOFARM - ATUALIZADA ]
+----------------------------------------------------------------
+AutoTab:CreateSection("Marshmallow AutoFarm")
+
+AutoTab:CreateToggle({
+    Name = "Iniciar AutoFarm (Cooking Pots)",
+    CurrentValue = false,
+    Flag = "AutoFarmMainToggle",
+    Callback = function(Value)
+        if Value then startAutoFarm() else stopAutoFarm() end
+    end,
+})
+
+AutoTab:CreateButton({
+    Name = "Vender para Lamont Bell (Instant)",
+    Callback = function()
+        pcall(function()
+            local npc = Workspace.Folders.NPCs:FindFirstChild("Lamont Bell")
+            if npc and npc:FindFirstChild("UpperTorso") then
+                local pp = npc.UpperTorso:FindFirstChild("ProximityPrompt")
+                if pp then
+                    pp.HoldDuration = 0
+                    fireproximityprompt(pp)
+                end
+            end
+        end)
+    end,
+})
+
+AutoTab:CreateDivider()
+
+-- Label que será atualizada
+local MarshLabel = AutoTab:CreateLabel("🍡 Marshmallows possíveis: 0")
+
+-- Variável para controlar o loop do contador
+local countingActive = false
+
+AutoTab:CreateToggle({
+    Name = "Atualizar Contador em Tempo Real",
+    CurrentValue = false,
+    Flag = "RealTimeCounter",
+    Callback = function(Value)
+        countingActive = Value
+        
+        -- Inicia uma thread separada para não travar a UI
+        task.spawn(function()
+            while countingActive do
+                local s = countItems("Sugar Block Bag")
+                local w = countItems("Water")
+                local g = countItems("Gelatin")
+                local total = math.min(s, w, g)
+                
+                MarshLabel:Set("🍡 Marshmallows possíveis: " .. tostring(total))
+                
+                task.wait(1) -- Atualiza a cada 1 segundo para evitar lag
+            end
+        end)
+    end,
+})
 
 Themes:CreateDropdown({
     Name = "Current Theme",
