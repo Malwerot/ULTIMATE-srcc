@@ -143,6 +143,38 @@ Themes:CreateDropdown({
 })
 
 local Sense = loadstring(game:HttpGet('https://raw.githubusercontent.com/Malwerot/BH4L-ULTIMATE/refs/heads/main/sense.lua'))()
+
+----------------------------------------------------------------
+-- [ ABA: SENSE (ESP) ]
+----------------------------------------------------------------
+local Sense = loadstring(game:HttpGet('https://raw.githubusercontent.com/Malwerot/BH4L-ULTIMATE/refs/heads/main/sense.lua'))()
+
+-- === INÍCIO DO FIX ===
+-- Proteção para evitar o erro "attempt to index number with 'Visible'"
+local originalRender = Sense.Render
+Sense.Render = function(self)
+    local success = pcall(function()
+        if self.drawings and self.drawings.box3d then
+            for i, face in ipairs(self.drawings.box3d) do
+                if type(face) == "table" then
+                    for i2, line in ipairs(face) do
+                        -- Se a linha virou um número, neutralizamos ela
+                        if type(line) ~= "table" and type(line) ~= "userdata" then
+                            face[i2] = { Visible = false, Remove = function() end }
+                        end
+                    end
+                end
+            end
+        end
+        return originalRender(self)
+    end)
+    if not success then return end
+end
+-- === FIM DO FIX ===
+
+Sense.teamSettings.enemy.enabled = true
+Sense.teamSettings.friendly.enabled = true
+
 Sense.teamSettings.enemy.enabled = true
 Sense.teamSettings.friendly.enabled = true
 
@@ -277,7 +309,7 @@ for _, entry in ipairs(ui) do
     createControl(entry)
 end
 
--- Sense.Load()
+Sense.Load()
 Rayfield:LoadConfiguration()
 
 local limbs = {}
