@@ -142,7 +142,7 @@ Themes:CreateDropdown({
     end,
 })
 
---local Sense = loadstring(game:HttpGet('https://sirius.menu/sense'))()
+-- local Sense = loadstring(game:HttpGet('https://sirius.menu/sense'))()
 Sense.teamSettings.enemy.enabled = true
 Sense.teamSettings.friendly.enabled = true
 
